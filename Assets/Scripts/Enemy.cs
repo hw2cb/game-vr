@@ -6,7 +6,7 @@ using UnityEngine.AI;
 public class Enemy : MonoBehaviour
 {
     [Header("Игрок")]
-    public Transform player;
+    public Transform player2;
     private float distance;
 
     [Header("Радиус видимости")]
@@ -22,6 +22,11 @@ public class Enemy : MonoBehaviour
     [Header("Позиции")]
     public List<Transform> positions;
 
+
+    private Transform player;
+
+    private bool isRun = false;
+
     /*
      *  Радиус, когда олень начинает тригериться и вертеть бошкой, после этого, если игрок
      *  не выйдет из радиуса в течении 3 секунд, олень начинает убегать
@@ -29,6 +34,7 @@ public class Enemy : MonoBehaviour
      */
     private void Start()
     {
+        player = GameObject.Find("Main Camera").GetComponent<Transform>();
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
     }
@@ -37,34 +43,29 @@ public class Enemy : MonoBehaviour
     private void Update()
     {
         distance = Vector3.Distance(player.position, transform.position);
-        if (distance >= radius)
+        Debug.Log(distance);
+
+        if(distance < radius && !isRun)
         {
+            Run();
+        }
+        if(distance > 100)
+        {
+            isRun = false;
             agent.enabled = false;
             animator.speed = 0.37f;
             animator.Play("Naklon");
         }
-            
+    }
 
-        if(distance < radius)
-        {
-            Debug.Log("Run");
-            
-            //run
-            agent.enabled = true;
-            //agent.destination = enemy.position;
-
-            Vector3 newPos = player.forward * 30;
-            Debug.Log(newPos);
-            agent.SetDestination(newPos);
-            animator.speed = 1f;
-            animator.Play("Run");
-        }
-        if(distance <= 1.5)
-        {
-            //transform.LookAt(enemy);
-            agent.enabled = false;
-            animator.speed = 0.37f;
-            animator.Play("Naklon");
-        }
+    private void Run()
+    {
+        //run
+        int numberPoint = Random.Range(0, 8);
+        agent.enabled = true;
+        agent.SetDestination(positions[numberPoint].position);
+        animator.speed = 1.5f;
+        animator.Play("Run");
+        isRun = true;
     }
 }
